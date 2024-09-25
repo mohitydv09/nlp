@@ -1,0 +1,25 @@
+text,ground truth,prediction,confidence score,chatGPT prediction,error type,error cause,potential solution
+reign of fire looks as if it was made without much thought -- and is best watched that way .,1,0,0.9727554321,NA,false negetive,Negation,Linguistic features
+this flick is about as cool and crowd-pleasing as a documentary can get .,1,0,0.918166101,NA,false negetive,Word Ambiguity,More training data
+every nanosecond of the the new guy reminds you that you could be doing something else far more pleasurable .,0,1,0.9840131998,NA,false positive,Negation,More training data
+not since tom cruise in risky business has an actor made such a strong impression in his underwear .,1,0,0.8191047907,NA,false negetive,Negation,Linguistic features
+sam mendes has become valedictorian at the school for soft landings and easy ways out .,0,1,0.889136672,NA,false positive,Multipolarity,More training data
+"it takes a certain kind of horror movie to qualify as ` worse than expected , ' but ghost ship somehow manages to do exactly that . ",0,1,0.7903949022,NA,false positive,Negation,Linguistic features
+"with its dogged hollywood naturalism and the inexorable passage of its characters toward sainthood , windtalkers is nothing but a sticky-sweet soap . ",0,1,0.5705794096,NA,false positive,Word Ambiguity,More training data
+if steven soderbergh 's ` solaris ' is a failure it is a glorious failure .,1,0,0.6470538378,NA,false negetive,Negation,Linguistic features
+no telegraphing is too obvious or simplistic for this movie .,0,1,0.5151392817,NA,false positive,Word Ambiguity,Linguistic features
+"minority report is exactly what the title indicates , a report . ",1,0,0.9743862152,NA,false negetive,Multipolarity,More training data
+intriguing documentary which is emotionally diluted by focusing on the story 's least interesting subject .,1,0,0.6349627972,NA,false negetive,Multipolarity,Linguistic features
+"harrison 's flowers puts its heart in the right place , but its brains are in no particular place at all . ",1,0,0.9932478666,NA,false negetive,Multipolarity,Linguistic features
+manages to be both repulsively sadistic and mundane .,0,1,0.6820406318,NA,false positive,Negation,Linguistic features
+it seems like i have been waiting my whole life for this movie and now i ca n't wait for the sequel .,1,0,0.9793521166,NA,false negetive,Negetion,Data Cleaning
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+,,,,,,,
+Error Cause,Count,Percentage,,Potential Solution,Count,Percentage,
+Negation,6,42.85714286,,Linguistic features,8,57.14285714,
+Word Ambiguity,3,21.42857143,,More training data,5,35.71428571,
+Multipolarity,4,28.57142857,,Data Cleaning,1,7.142857143,
+Negetion,1,7.142857143,,,,,
