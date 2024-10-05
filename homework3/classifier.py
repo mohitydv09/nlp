@@ -3,14 +3,14 @@ import argparse
 import nltk
 from nltk.util import ngrams
 from nltk import FreqDist
-from nltk.lm import MLE
+from nltk.lm import MLE, Laplace, KneserNeyInterpolated, StupidBackoff
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.lm.preprocessing import pad_both_ends, flatten, padded_everygram_pipeline
 
 import numpy as np
 
 ## I am using NLTK tokenizer to tokenize the text.
-nltk.download('punkt')
+# nltk.download('punkt')
 
 def split_data(data:list[list[str]], test_size:float=0.1)->tuple[list[list[str]], list[list[str]]]:
     ## Split the data into training and testing data.
@@ -60,12 +60,10 @@ if __name__ == '__main__':
         training_data = preprocess_data(N, data) ## Data is a list[list]
 
         ## Load and process the test data
-        print("Implement correct test data loading.")
         testing_data = open(test, "r").read().lower()
         testing_data = [sent_tokenize(testing_data)] ### Converted to list to standardize the data format.
         testing_data = preprocess_data(N, testing_data)
     else:
-        print("Test file not provided, creating data with 90% train and 10% test")
         training_data, testing_data = split_data(data)
 
         ## Process the data.
@@ -73,12 +71,12 @@ if __name__ == '__main__':
         testing_data = preprocess_data(N, testing_data)
 
     if approach == 'generative':
-        print('Generative approach selected')
 
-        ## Train the model
-        ngram_models = [MLE(N) for _ in range(len(authorlist))]
+        ## You can StupidBackoff, KneserNeyInterpolated, Laplace, MLE
+        ngram_models = [StupidBackoff(order=N) for _ in range(len(authorlist))]
 
         ## Train the models.
+        print("Training the models, this may take some time")
         for model, data in zip(ngram_models, training_data):
             model.fit(data[0], data[1])
         
@@ -90,18 +88,15 @@ if __name__ == '__main__':
         else:
             results = np.zeros((len(authorlist),len(testing_data_ngrams)))
             for i,text_data in enumerate(testing_data_ngrams):
-                # size_text_data = len(text_data)
                 for sentence in text_data:
                     sentence = list(sentence)
-
                     predictions = [model.perplexity(sentence) for model in ngram_models]
                     if np.min(predictions) == np.inf:
                         continue
                     prediction = np.argmin(predictions)
-                    # print("Prediction: ", prediction)
                     results[i,prediction] += 1
-                # results[i] = results[i]/size_text_data
-        print(results)
-        print(np.sum(results, axis=1))
         results = results/np.sum(results, axis=1, keepdims=True)
-        print(results)
+        print("Results on dev set:")
+        for i,author in enumerate(authorlist):
+            author = author.split(".")[0]
+            print(f"{author:<10}  {results[i,i]*100:.2f}% correct")
