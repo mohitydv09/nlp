@@ -1,11 +1,8 @@
 import argparse
 
-import nltk
-from nltk.util import ngrams
-from nltk import FreqDist
 from nltk.lm import MLE, Laplace, KneserNeyInterpolated, StupidBackoff
 from nltk.tokenize import word_tokenize, sent_tokenize
-from nltk.lm.preprocessing import pad_both_ends, flatten, padded_everygram_pipeline
+from nltk.lm.preprocessing import padded_everygram_pipeline
 
 import numpy as np
 
@@ -33,7 +30,7 @@ def argument_parser():
     parser.add_argument('-approach', 
                         type=str, 
                         choices=['generative','descriminative'], 
-                        required=False,
+                        required=True,
                         help='Choose the approach to classify the author: Options: generative, discriminative')
     parser.add_argument('-test',
                         type=str,
@@ -83,7 +80,16 @@ if __name__ == '__main__':
         testing_data_ngrams = [item[0] for item in testing_data]
 
         if test:
-            print("Do something with the test data")
+            print("Predictions for each sentence in the test file:")
+            for i,text_data in enumerate(testing_data_ngrams):
+                for sentence in text_data:
+                    sentence = list(sentence)
+                    predictions = [model.perplexity(sentence) for model in ngram_models]
+                    if np.min(predictions) == np.inf:
+                        print("No prediction, inf perplexity")
+                        continue
+                    prediction = np.argmin(predictions)
+                    print(f"{authorlist[prediction].split('.')[0]}")
 
         else:
             results = np.zeros((len(authorlist),len(testing_data_ngrams)))
@@ -95,8 +101,8 @@ if __name__ == '__main__':
                         continue
                     prediction = np.argmin(predictions)
                     results[i,prediction] += 1
-        results = results/np.sum(results, axis=1, keepdims=True)
-        print("Results on dev set:")
-        for i,author in enumerate(authorlist):
-            author = author.split(".")[0]
-            print(f"{author:<10}  {results[i,i]*100:.2f}% correct")
+            results = results/np.sum(results, axis=1, keepdims=True)
+            print("Results on dev set:")
+            for i,author in enumerate(authorlist):
+                author = author.split(".")[0]
+                print(f"{author:<10}  {results[i,i]*100:.2f}% correct")
