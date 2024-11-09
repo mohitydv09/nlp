@@ -136,7 +136,6 @@ class task3E():
         data_dict = {"model": "OpenAI", 'prompt': system_task + "\n\n" + system_prompt_initial_openai, 'response': openai_output}
         data.append(data_dict)
 
-        data = [{'i': 'John Doe', 'age': 30}, {'name': 'Jane Doe', 'age': 25}]
         if output_path != None:
             with open(output_path, "w") as f:
                 f.write("Gemini Output: \n" + gemini_output + "\n\n")
@@ -173,7 +172,7 @@ if __name__ == "__main__":
 
 
     # Task 3: Use the Gemini API to generate text
-    AI_debate = task3E(api_key_gemini="See Slack", api_key_openai="See Slack")
+    AI_debate = task3E(api_key_gemini=Gemini_key, api_key_openai=Openai_key)
 
     system_task = """You are having a debate with another person that is going to give their perspective on a contriversial topic. 
                     Please acknowledge the opposing beliefs (if any) and answer their questions. Give a couple reasons why you 
