@@ -10,6 +10,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from transformers import pipeline
 
 import google.generativeai as genai
+import json
 
 class LLMs:
     def __init__(self, load_default_api_model=False, load_default_open_source_model=False):
@@ -127,9 +128,15 @@ class task3E():
     def have_a_debate(self, system_task, system_prompt_initial_gemini, system_prompt_initial_openai, output_path=None):
         gemini_output = self.get_gemini_output(system_task + "\n\n" + system_prompt_initial_gemini, "", initial=True)
         print("Gemini Output: ", gemini_output)
+        data_dict = {"model": "Gemini", 'prompt': system_task + "\n\n" + system_prompt_initial_gemini, 'response': gemini_output}
+        data = [data_dict]
 
         openai_output = self.get_openai_output(system_task + "\n\n" + system_prompt_initial_openai, "", initial=False)
         print("OpenAI Output: ", openai_output)
+        data_dict = {"model": "OpenAI", 'prompt': system_task + "\n\n" + system_prompt_initial_openai, 'response': openai_output}
+        data.append(data_dict)
+
+        data = [{'i': 'John Doe', 'age': 30}, {'name': 'Jane Doe', 'age': 25}]
         if output_path != None:
             with open(output_path, "w") as f:
                 f.write("Gemini Output: \n" + gemini_output + "\n\n")
@@ -137,14 +144,21 @@ class task3E():
 
         for i in range(3):
             gemini_output = self.get_gemini_output(system_task, openai_output)
+            data_dict = {"model": "Gemini", 'prompt': system_task, 'response': gemini_output}
+            data.append(data_dict)
             print("OpenAI Output: \n", openai_output)
             print("\n\n")
             openai_output = self.get_openai_output(system_task, gemini_output)
+            data_dict = {"model": "OpenAI", 'prompt': system_task, 'response': openai_output}
+            data.append(data_dict)
             print("Gemini Output: \n", gemini_output)
             print("\n\n")
             if output_path != None:
                 with open(output_path, "a") as f:
                     f.write("Gemini Output: \n" + gemini_output + "\n\n" + "Openai Output: \n" + openai_output + "\n\n")
+        with open('./homework5/data.json', 'w') as f:
+            json.dump(data, f, indent=4)
+        
 
 if __name__ == "__main__":
     # llms = LLMs(load_default_api_model=True, load_default_open_source_model=True)
