@@ -1,7 +1,10 @@
 import os
 import torch
+from datetime import datetime
+import json
 import tabulate
 import textwrap
+
 
 from langchain_openai import ChatOpenAI
 from langchain_huggingface.llms import HuggingFacePipeline
@@ -9,8 +12,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from transformers import pipeline
 
-import google.generativeai as genai
-import json
+# import google.generativeai as genai
+# import json
 
 class LLMs:
     def __init__(self, load_default_api_model=False, load_default_open_source_model=False):
@@ -20,9 +23,9 @@ class LLMs:
             "API_model" : None,
             "open_model" : None
             } ## Dictionary to store the models
-        if load_default_api_model:          
+        if load_default_api_model:
             self.load_api_model()
-        if load_default_open_source_model:  
+        if load_default_open_source_model:
             self.load_open_source_model()
 
     def load_api_model(self, model_name='gpt-3.5-turbo'):
@@ -31,7 +34,7 @@ class LLMs:
     def load_open_source_model(self,
                                model_name='meta-llama/Llama-3.2-3B',
                                task='text-generation',
-                               max_tokens=20):
+                               max_tokens=100):
         self.models["open_model"] = HuggingFacePipeline.from_model_id(model_id=model_name, 
                                                                       task=task,
                                                                       device=self.device,
@@ -79,11 +82,7 @@ def test_llms(llms):
     print(tabulate.tabulate(table_data, headers=headers, tablefmt="grid"))
 
 
-
-
-
-
-class task3E():
+class task3E:
     def __init__(self, api_key_gemini, api_key_openai):
         # self.api_key = api_key
         # self.device = device
@@ -158,31 +157,50 @@ class task3E():
         with open('./homework5/data.json', 'w') as f:
             json.dump(data, f, indent=4)
         
+def read_prompts_from_file(filename):
+    with open(filename, "r") as f:
+        prompts = f.read().split("\n\n")
+    return prompts
+
 
 if __name__ == "__main__":
-    # llms = LLMs(load_default_api_model=True, load_default_open_source_model=True)
+    llms = LLMs(load_default_api_model=True, load_default_open_source_model=True)
 
     # ## Task 1: Test the LLMs
     # test_llms(llms)
 
+    # ## Task 3a: Jailbreaking the Models
+    ## For writing in the text file. Seperate each prompt with a double newline.
+    one_shot_prompts = read_prompts_from_file("one_shot_prompts.txt")
+    multi_shot_prompts = read_prompts_from_file("multi_shot_prompts.txt")
+    chain_of_thought_prompts = read_prompts_from_file("chain_of_thought_prompts.txt")
 
-    # Task 2: Choose the types of prompting we want to use
-    # 1. Meta Prompting
-    # 2. Zero-shot Prompting
+    print("Number of One Shot Prompts: ", len(one_shot_prompts))
+    print("Number of Multi Shot Prompts: ", len(multi_shot_prompts))
+    print("Number of Chain-of-Thought Prompts: ", len(chain_of_thought_prompts))
 
+    ## initialize the data dictionary to store the data.
+    data_dict = {
+        "OneShot" : [],
+        "MultiShot" : [],
+        "ChainOfThought" : []
+    }
+    prompt_techniques = ["OneShot", "MultiShot", "ChainOfThought"]
+    prompts = [one_shot_prompts, multi_shot_prompts, chain_of_thought_prompts]
 
-    # Task 3: Use the Gemini API to generate text
-    AI_debate = task3E(api_key_gemini=Gemini_key, api_key_openai=Openai_key)
-
-    system_task = """You are having a debate with another person that is going to give their perspective on a contriversial topic. 
-                    Please acknowledge the opposing beliefs (if any) and answer their questions. Give a couple reasons why you 
-                    believe what you do, and 1-2 questions to the person you are debating. If you feel that you are being pursuaded 
-                    to the other side, you can say so or begin to shift viewpoints. Keep you answer concise and a single paragraph."""
+    for prompt_technique, prompt_list in zip(prompt_techniques, prompts):
+        for prompt in prompt_list:
+            data_dict[prompt_technique].append(
+                {
+                    "Prompt": prompt, 
+                    "API model response": llms.generate_text('API_model', prompt), 
+                    "API model success": "1/0",
+                    "Open model response": llms.generate_text('open_model', prompt),
+                    "Open model success": "1/0"
+                }
+            )
     
-    gemini_system_prompt_initial = "You firmly belive pineapple is great on pizza."
-    openai_system_prompt_initial = "You do not belive pineapple belongs on pizza."
-    
-    AI_debate.have_a_debate(system_task, gemini_system_prompt_initial, openai_system_prompt_initial, './homework5/debate.txt')
-    # print(AI_debate.get_gemini_output())
-
-
+    ## Saving the file.
+    filename = f"data_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.json"
+    with open(filename, 'w') as f:
+        json.dump(data_dict, f, indent=4)
