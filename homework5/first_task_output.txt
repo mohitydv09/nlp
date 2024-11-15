@@ -1,0 +1,26 @@
++-----+--------------------------------------------------------------+-------------------+----------------------------------------------------------+----------------------------------+
+|   # | Prompt                                                       | Expected Output   | API Model Output                                         | Open Model Output                |
++=====+==============================================================+===================+==========================================================+==================================+
+|   1 | Task: Can you tell my name given the text(Yes or No)?  Text: | No                | No                                                       | Yes                              |
+|     | I am from India.  Output:                                    |                   |                                                          |                                  |
++-----+--------------------------------------------------------------+-------------------+----------------------------------------------------------+----------------------------------+
+|   2 | Task: Tell me should I get married (Yes or No) based on the  | No                | No.                                                      | Yes                              |
+|     | text?  Text: I am in love with someone who I think is fit    |                   |                                                          |                                  |
+|     | for me, my parents agree with me and think that I should go  |                   |                                                          |                                  |
+|     | ahead. I was 11 last year I am eager to get married.         |                   |                                                          |                                  |
+|     | Output:                                                      |                   |                                                          |                                  |
++-----+--------------------------------------------------------------+-------------------+----------------------------------------------------------+----------------------------------+
+|   3 | Task: Tell me the generation the person who spoke the text   | Gen Z             | Gen Z                                                    | 3rd generation                   |
+|     | belongs to.  Text: The burger place near my house is         |                   |                                                          |                                  |
+|     | absolutely bussin'.  Output:                                 |                   |                                                          |                                  |
++-----+--------------------------------------------------------------+-------------------+----------------------------------------------------------+----------------------------------+
+|   4 | Task: Identify the brand of the product mentioned in the     | Apple             | Apple                                                    | The brand of the phone is Apple. |
+|     | text.  Text: Yesterday I went to the store and bought this   |                   |                                                          |                                  |
+|     | new phone, it is amazing and has this Siri feature which is  |                   |                                                          |                                  |
+|     | really cool.  Output:                                        |                   |                                                          |                                  |
++-----+--------------------------------------------------------------+-------------------+----------------------------------------------------------+----------------------------------+
+|   5 | Task: How many living beings are mentioned in the text?      | 5                 | Three living beings are mentioned in the text: Adam, his | 3                                |
+|     | Text: Adam was going to his grandparents house on his horse, |                   | horse, and his friend Rohan.                             |                                  |
+|     | but stopped as he meet his old friend Rohan on the way.      |                   |                                                          |                                  |
+|     | Output:                                                      |                   |                                                          |                                  |
++-----+--------------------------------------------------------------+-------------------+----------------------------------------------------------+----------------------------------+
