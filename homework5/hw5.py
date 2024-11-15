@@ -13,7 +13,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from transformers import pipeline
 
 class LLMs:
-    def __init__(self, load_default_api_model=False, load_default_open_source_model=False):
+    def __init__(self, load_default_api_model=False, load_default_open_source_model=False, num_tokens=100):
         self.openai_api_key = os.environ["OPENAI_API_KEY"]
         self.device = 0 if torch.cuda.is_available() else -1
         self.models = {
@@ -23,7 +23,7 @@ class LLMs:
         if load_default_api_model:
             self.load_api_model()
         if load_default_open_source_model:
-            self.load_open_source_model()
+            self.load_open_source_model(max_tokens=num_tokens)
 
     def load_api_model(self, model_name='gpt-3.5-turbo'):
         self.models["API_model"] = ChatOpenAI(model=model_name, api_key=self.openai_api_key)
@@ -90,16 +90,19 @@ def csv2json(csv_file, json_file):
 
 
 if __name__ == "__main__":
-    llms = LLMs(load_default_api_model=True, load_default_open_source_model=True)
+    llms1 = LLMs(load_default_api_model=True, load_default_open_source_model=True)
 
     # ## Task 1: Test the LLMs
-    # test_llms(llms)
+    test_llms(llms1)
+    llms1 = None # Clearing the ram
 
     ## Task 3a:
+    llms = LLMs(load_default_api_model=True, load_default_open_source_model=True, num_tokens=1000)
     ## Load the Prompts
     data_df = pd.read_csv("NLP HW4 Prompts.csv", header=0, dtype=str)
 
     for index, row in data_df.iterrows():
+        print(f"Processing row {index}/90")
         if pd.isna(row["Prompt"]):
             continue
         prompt = row["Prompt"]
