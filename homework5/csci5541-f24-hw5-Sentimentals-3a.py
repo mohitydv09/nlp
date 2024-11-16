@@ -5,6 +5,8 @@ import tabulate
 import textwrap
 import pandas as pd
 from datetime import datetime
+import argparse
+import matplotlib.pyplot as plt
 
 from langchain_openai import ChatOpenAI
 from langchain_huggingface.llms import HuggingFacePipeline
@@ -15,6 +17,9 @@ from transformers import pipeline
 class LLMs:
     def __init__(self, load_default_api_model=False, load_default_open_source_model=False, num_tokens=100):
         self.openai_api_key = os.environ["OPENAI_API_KEY"]
+        if self.openai_api_key is None:
+            print("Please set the OPENAI_API_KEY environment variable.")
+            exit()
         self.device = -1 #0 if torch.cuda.is_available() else -1
         self.models = {
             "API_model" : None,
@@ -61,7 +66,7 @@ def test_llms(llms):
     ]
 
     api_model_outputs = [llms.generate_text('API_model', prompt) for prompt in prompts]
-    open_model_outputs = [llms.generate_text('open_model', prompt) for prompt in prompts]
+    open_model_outputs = [llms.generate_text('open_model', prompt)[len(prompt):].strip() for prompt in prompts]
 
     prompts = [prompt.replace("\n","") for prompt in prompts]
     api_model_outputs = [output.replace("\n","") for output in api_model_outputs]
@@ -71,7 +76,7 @@ def test_llms(llms):
         return "\n".join(textwrap.wrap(text, width))
 
     table_data = [
-        [i + 1, wrap_text(prompts[i]), expected_outputs[i], wrap_text(api_model_outputs[i]), wrap_text(open_model_outputs[i])]
+        [i + 1, wrap_text(prompts[i], width=60), expected_outputs[i], wrap_text(api_model_outputs[i], width=30), wrap_text(open_model_outputs[i], width=30)]
         for i in range(len(prompts))
     ]
 
@@ -133,7 +138,7 @@ def evaluate_metrics(data_json):
     api_model_success = success_jailbreak_api_model_zero_shot + success_jailbreak_api_model_few_shot + success_jailbreak_api_model_cot
     open_model_success = success_jailbreak_open_model_zero_shot + success_jailbreak_open_model_few_shot + success_jailbreak_open_model_cot
 
-    print("\nOverall success rate of the models.")
+    print("\nOverall Jailbreaking success on the models.")
     headers = ["Model", "Success Rate"]
     table_data = [
         ["API Model", str(api_model_success)+ "/90"],
@@ -141,29 +146,44 @@ def evaluate_metrics(data_json):
     ]
     print(tabulate.tabulate(table_data, headers=headers, tablefmt="grid", colalign=("center", "center")))
 
-if __name__ == "__main__":
-    # llms = LLMs(load_default_api_model=True, load_default_open_source_model=True)
 
-    ## Task 1: Test the LLMs
-    # test_llms(llms)
+if __name__ == "__main__":
+    
+    ## Parse the arguments
+    parser = argparse.ArgumentParser(description='CSCI 5541 Homework 5 - Sentimentals')
+    parser.add_argument('--task', type=str, default="eval", help='Task to run, possible values: task1, task3, eval')
+    args = parser.parse_args()
+    if args.task not in ["task1", "task3", "eval"]:
+        print("Invalid task please provide a valid task. Possible values: task1, task3, eval. Usage example: python csci5541-f24-hw5-Sentimentals-3a.py --task task1")
+        exit()
+
+    # Task 1:
+    if args.task == "task1":
+        llms = LLMs(load_default_api_model=True, load_default_open_source_model=True)
+        test_llms(llms)
 
     ## Task 3a:
-    ## Load the Prompts
-    # data_df = pd.read_csv("csci5541-f24-hw5-Sentimentals-3a.csv", header=0, dtype=str)
-    # generated_responces_df = generate_responces_on_prompts(llms, data_df)
+    if args.task == "task3":
+        try:
+            data_df = pd.read_csv("csci5541-f24-hw5-Sentimentals-3a.csv", header=0, dtype=str)
+        except FileNotFoundError:
+            print("csci5541-f24-hw5-Sentimentals-3a.csv file not found.")
+            exit()
+        generated_responces_df = generate_responces_on_prompts(llms, data_df)
 
-    # ## Save the file.
-    # generated_responces_df.to_csv("csci5541-f24-hw5-Sentimentals-3a.csv", index=False)
-    # print("File saved successfully.")
+        ## Save the file as cvs and json.
+        generated_responces_df.to_csv("csci5541-f24-hw5-Sentimentals-3a.csv", index=False)
+        save_responces_as_json(generated_responces_df, "csci5541-f24-hw5-Sentimentals-3a.json")
 
-    ## Write output to a json file
-    # generated_responces_df = pd.read_csv("csci5541-f24-hw5-Sentimentals-3a.csv", header=0, dtype=str)
-    # save_responces_as_json(generated_responces_df, "csci5541-f24-hw5-Sentimentals-3a.json")
+    if args.task == "eval":
+        ## Evaluating of outputs.
+        ## Read the json file form the disk.
+        try:
+            with open("csci5541-f24-hw5-Sentimentals-3a.json", 'r') as f:
+                data_json = json.load(f)
+        except FileNotFoundError:
+            print("csci5541-f24-hw5-Sentimentals-3a.json file not found.")
+            exit()
 
-    ## Evaluating of outputs.
-    ## REad the json file form the disk.
-    with open("csci5541-f24-hw5-Sentimentals-3a.json", 'r') as f:
-        data_json = json.load(f)
-
-    ## Run the evaluation metrics
-    evaluate_metrics(data_json)
+        ## Run the evaluation metrics
+        evaluate_metrics(data_json)
